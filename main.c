@@ -143,20 +143,35 @@ void execute_shell_builtin(char* command, char** args) {
             perror("getcwd() error");
             exit(EXIT_FAILURE);
         }
-    } else if (strcmp(command, "echo") == 0) {
+    } else if (strcmp(command, "echo") == 0){
         // Handle 'echo' command
         for (int i = 1; args[i] != NULL; i++) {
-            // Check if argument starts with '$'
-            if (args[i][0] == '$') {
-                // Get variable name (skip '$')
-                char* var_name = args[i] + 1;
-                // Get variable value using getenv()
-                char* var_value = getenv(var_name);
-                if (var_value != NULL) {
-                    printf("%s ", var_value);
+            char* argument = args[i];
+            if (argument[0] == '\"' && argument[strlen(argument) - 1] == '\"') {
+                // Remove leading and trailing double quotation marks
+                char* content = strdup(argument + 1);
+                content[strlen(content) - 1] = '\0';
+                
+                // Tokenize the content by spaces
+                char* token = strtok(content, " ");
+                while (token != NULL) {
+                    if (token[0] == '$') {
+                        // Get variable name (skip '$')
+                        char* var_name = token + 1;
+                        // Get variable value using getenv()
+                        char* var_value = getenv(var_name);
+                        if (var_value != NULL) {
+                            printf("%s ", var_value);
+                        }
+                    } else {
+                        printf("%s ", token);
+                    }
+                    token = strtok(NULL, " ");
                 }
+                free(content);
             } else {
-                printf("%s ", args[i]);
+                // If the argument is not enclosed in double quotes, print it as is
+                printf("%s ", argument);
             }
         }
         printf("\n");
