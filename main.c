@@ -163,17 +163,24 @@ void execute_shell_builtin(char* command, char** args) {
     } else if (strcmp(command, "echo") == 0) {
         // Handle 'echo' command
         for (int i = 1; args[i] != NULL; i++) {
-            // Check if argument starts with '$'
-            if (args[i][0] == '$') {
-                // Get variable name (skip '$')
-                char* var_name = args[i] + 1;
-                // Get variable value using getenv()
-                char* var_value = getenv(var_name);
-                if (var_value != NULL) {
-                    printf("%s ", var_value);
-                }
+            // Check if argument starts and ends with double quotes
+            if (args[i][0] == '"' && args[i][strlen(args[i]) - 1] == '"') {
+                // Print the argument without quotes
+                printf("%s ", args[i] + 1);
+                args[i][strlen(args[i]) - 1] = '\0'; // Remove trailing quote
             } else {
-                printf("%s ", args[i]);
+                // Check if argument starts with '$' and replace with variable value
+                if (args[i][0] == '$') {
+                    // Get variable name (skip '$')
+                    char* var_name = args[i] + 1;
+                    // Get variable value using getenv()
+                    char* var_value = getenv(var_name);
+                    if (var_value != NULL) {
+                        printf("%s ", var_value);
+                    }
+                } else {
+                    printf("%s ", args[i]);
+                }
             }
         }
         printf("\n");
