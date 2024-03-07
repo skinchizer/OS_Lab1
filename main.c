@@ -72,6 +72,23 @@ void shell() {
 
         // Parse input
         parse_input(input, command, args, &background);
+		
+		// Replace variables in arguments
+        for (int i = 0; args[i] != NULL; i++) {
+            if (args[i][0] == '$') {
+                // Get variable name (skip '$')
+                char* var_name = args[i] + 1;
+                // Get variable value using getenv()
+                char* var_value = getenv(var_name);
+                if (var_value != NULL) {
+                    // Replace argument with variable value
+                    args[i] = var_value;
+                } else {
+                    printf("Variable %s not found.\n", var_name);
+                    continue;
+                }
+            }
+        }
 
         // Execute command
         if (strcmp(command, "exit") == 0) {
