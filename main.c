@@ -76,7 +76,13 @@ void shell() {
         // Execute command
         if (strcmp(command, "exit") == 0) {
             break; // Exit shell
-        } else if (strcmp(command, "") != 0) {
+        } else if (strcmp(command, "echo") == 0) {
+			execute_shell_builtin(command, args);
+		} else if (strcmp(command, "cd") == 0) {
+			execute_shell_builtin(command, args);
+		} else if (strcmp(command, "export") == 0) {
+			execute_shell_builtin(command, args);
+		} else if (strcmp(command, "") != 0) {
             if (background) {
                 // Execute command in background
                 execute_command(command, args, 1);
@@ -105,14 +111,31 @@ void parse_input(char* input, char* command, char** args, int* background) {
 }
 
 void execute_shell_builtin(char* command, char** args) {
-    if (strcmp(command, "cd") == 0) {
-        // Change directory
-        if (args[1] == NULL) {
+        if (strcmp(command, "cd") == 0) {
+        // Handle 'cd' command
+        char* target_dir = args[1];
+        if (target_dir == NULL) {
             // Change to home directory
             chdir(getenv("HOME"));
         } else {
-            if (chdir(args[1]) != 0) {
-                perror("cd failed");
+            // Handle '~' symbol
+            if (target_dir[0] == '~') {
+                char* home_dir = getenv("HOME");
+                char new_target_dir[MAX_COMMAND_LENGTH];
+                snprintf(new_target_dir, sizeof(new_target_dir), "%s%s", home_dir, target_dir + 1);
+                target_dir = new_target_dir;
+            }
+            // Handle '.' and '..' symbols
+            if (strcmp(target_dir, ".") == 0) {
+                // Current directory, no action needed
+            } else if (strcmp(target_dir, "..") == 0) {
+                // Move to parent directory
+                chdir("..");
+            } else {
+                // Change to specified directory
+                if (chdir(target_dir) != 0) {
+                    perror("cd failed");
+                }
             }
         }
     } else if (strcmp(command, "echo") == 0) {
