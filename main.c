@@ -138,6 +138,11 @@ void execute_shell_builtin(char* command, char** args) {
                 }
             }
         }
+		// Update cwd
+        if (getcwd(cwd, sizeof(cwd)) == NULL) {
+            perror("getcwd() error");
+            exit(EXIT_FAILURE);
+        }
     } else if (strcmp(command, "echo") == 0) {
         // Echo command
         for (int i = 1; args[i] != NULL; i++) {
