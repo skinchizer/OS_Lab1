@@ -144,9 +144,20 @@ void execute_shell_builtin(char* command, char** args) {
             exit(EXIT_FAILURE);
         }
     } else if (strcmp(command, "echo") == 0) {
-        // Echo command
+        // Handle 'echo' command
         for (int i = 1; args[i] != NULL; i++) {
-            printf("%s ", args[i]);
+            // Check if argument starts with '$'
+            if (args[i][0] == '$') {
+                // Get variable name (skip '$')
+                char* var_name = args[i] + 1;
+                // Get variable value using getenv()
+                char* var_value = getenv(var_name);
+                if (var_value != NULL) {
+                    printf("%s ", var_value);
+                }
+            } else {
+                printf("%s ", args[i]);
+            }
         }
         printf("\n");
     } else if (strcmp(command, "export") == 0) {
